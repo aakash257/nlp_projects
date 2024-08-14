@@ -1,0 +1,43 @@
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.end_of_word = False
+
+
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+
+    def insert(self, word):
+        node = self.root
+        for letter in word:
+            if letter not in node.children:
+                node.children[letter] = TrieNode()
+            node = node.children[letter]
+        node.end_of_word = True
+
+    def search(self, word):
+        node = self.root
+        for letter in word:
+            if letter not in node.children:
+                return False
+            node = node.children[letter]
+        return node.end_of_word
+
+    def starts_with(self, prefix):
+        node = self.root
+        for letter in prefix:
+            if letter not in node.children:
+                return []
+            node = node.children[letter]
+        return self._collect_words(node, prefix)
+
+    def _collect_words(self, node, prefix):
+        words = []
+        if node.end_of_word:
+            words.append(prefix)
+        for letter, next_node in node.children.items():
+            words.extend(self._collect_words(next_node, prefix + letter))
+        return words
+
+
