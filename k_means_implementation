@@ -1,0 +1,54 @@
+import random
+
+
+class Centroid:
+    def __init__(self, location):
+        self.location = location
+        self.closest_users = set()
+
+
+def get_k_means(user_feature_map, num_features_per_user, k):
+    
+    random.seed(30)
+    
+    inital_centroid_users = random.sample(sorted(list(user_feature_map.keys())), k)
+    
+    # Write your code here.
+    centroids = [Centroid(user_feature_map[userid]) for userid in inital_centroid_users]
+    
+    for i in range(10):
+        for uid, features in user_feature_map.items():
+            get_closest_centroid(features, centroids).closest_users.add(uid)
+
+        #update centroid location
+        for centroid in centroids:
+            centroid.location = get_centroid_location(centroid.closest_users, user_feature_map, num_features_per_user)
+            centroid.closest_users = set()
+            
+    output = [centroid.location for centroid in centroids]            
+          
+    return output
+
+def calc_dist(X, Y):
+    #manhattan distance
+    return sum([abs(x-y) for x,y in zip(X, Y)])
+
+def get_closest_centroid(user_features, centroids):
+    closest_centroid = None
+    closest_centroid_distance = float("inf")
+    for centroid in centroids:
+        dist = calc_dist(centroid.location, user_features)
+        if dist < closest_centroid_distance:
+            closest_centroid_distance = dist
+            closest_centroid = centroid
+    return closest_centroid
+
+def get_centroid_location(closest_users, user_feature_map, num_features_per_user):
+    closest_users_locations = [user_feature_map[userid] for userid in closest_users]
+    new_location = [0]*num_features_per_user
+    
+    for user_location in closest_users_locations:
+        new_location = [sum(x) for x in zip(new_location, user_location)]
+    
+    new_location = [ele/len(closest_users) for ele in new_location]        
+    return new_location
